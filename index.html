@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Line of sight using Bresenhams</title>
+    </head>
+
+    <style>
+        body {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            height: 100vh;
+        }
+
+        canvas {
+            border: 1px solid red;
+        }
+    </style>
+
+    <body>
+        <canvas id="map" width = 500 height = 500></canvas>
+    </body>
+
+    <script>
+        var canvas = document.getElementById("map");
+        var context = canvas.getContext("2d");
+        var gridSize = 7;
+        var boxWidth = canvas.width/gridSize;
+        var boxHeight = canvas.height/gridSize;
+        var grid = [];
+        for (let i = 0; i < gridSize; i++) {
+            for (let j = 0; j < gridSize; j++) {
+                grid.push({x: i, y: j, isWall: false, xMult: -1, yMult: 1});
+            }
+        }
+
+        console.log(grid);
+        context.textAlign = "center";
+        context.font = "20px Arial";
+        let cell;
+        for (let i = 0; i < grid.length; i++) {
+            cell = grid[i];
+            context.fillStyle = "grey";
+            fillRect(cell.x, cell.y, 2);
+            context.fillStyle = "black";
+            fillText("(" + cell.x * cell.xMult + ", " + cell.y * cell.yMult + ")", cell.x, cell.y, 2);
+        }
+
+        // {x: 0, y: 0}, {x: 6, y: 6}
+        bresenhams(grid[0], grid[37], 2);
+        /* bresenhams(grid[0], grid[6], 2);
+        bresenhams(grid[0], grid[13], 2);
+        bresenhams(grid[0], grid[20], 2);
+        bresenhams(grid[0], grid[27], 2);
+        bresenhams(grid[0], grid[34], 2);
+        bresenhams(grid[0], grid[41], 2);
+        bresenhams(grid[0], grid[48], 2);
+        bresenhams(grid[0], grid[47], 2);
+        bresenhams(grid[0], grid[46], 2);
+        bresenhams(grid[0], grid[45], 2);
+        bresenhams(grid[0], grid[44], 2);
+        bresenhams(grid[0], grid[43], 2);
+        bresenhams(grid[0], grid[42], 2); */
+
+        function bresenhams(cell1, cell2, quad) {
+            let x1 = cell1.x, y1 = cell1.y, x2 = cell2.x, y2 = cell2.y;
+
+            let dx = x2 - x1, dy = y2 - y1;
+            let m = dy/dx;
+            let p;
+
+            console.log("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")");
+            context.fillStyle = "yellow";
+            fillRect(x1, y1, quad);
+            context.fillStyle = "black";
+            fillText("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")", x1, y1, quad);
+
+            if (m >= 0 && m <= 1) {
+                p = (2*dy) - dx;
+                while (x1 < x2) {
+                    if (p < 0) {
+                        x1++;
+                        p += 2*dy;
+                        console.log("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")");
+                        context.fillStyle = "yellow";
+                        fillRect(x1, y1, quad);
+                        context.fillStyle = "black";
+                        fillText("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")", x1, y1, quad);
+                    } else {
+                        x1++;
+                        y1++;
+                        p += 2*(dy - dx);
+                        console.log("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")");
+                        context.fillStyle = "yellow";
+                        fillRect(x1, y1, quad);
+                        context.fillStyle = "black";
+                        fillText("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")", x1, y1, quad);
+                    }
+                }
+            } else if (m > 1) {
+                p = (2*dx) - dy;
+                while (y1 < y2) {
+                    if (p < 0) {
+                        y1++;
+                        p += 2*dx;
+                        console.log("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")");
+                        context.fillStyle = "yellow";
+                        fillRect(x1, y1, quad);
+                        context.fillStyle = "black";
+                        fillText("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")", x1, y1, quad);
+                    } else {
+                        x1++;
+                        y1++;
+                        p += 2*(dx - dy);
+                        console.log("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")");
+                        context.fillStyle = "yellow";
+                        fillRect(x1, y1, quad);
+                        context.fillStyle = "black";
+                        fillText("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")", x1, y1, quad);
+                    }
+                }
+            }
+        }
+
+        function fillRect(x, y, quad) {
+            switch(quad) {
+                case 1:
+                    context.fillRect(x * boxWidth + 1, canvas.height - (y * boxHeight + 1) - boxHeight, boxWidth - 2, boxHeight - 2);
+                    break;
+                case 2:
+                    context.fillRect(canvas.width - (x * boxWidth + 1) - boxWidth, canvas.height - (y * boxHeight + 1) - boxHeight, boxWidth - 2, boxHeight - 2);
+                    break;
+                case 3:
+                    context.fillRect(canvas.width - (x * boxWidth + 1) - boxWidth, y * boxHeight + 1, boxWidth - 2, boxHeight - 2);
+                    break;
+                case 4:
+                    context.fillRect(x * boxWidth + 1, y * boxHeight + 1, boxWidth - 2, boxHeight - 2);
+                    break;
+            }
+        }
+
+        function fillText(text, x, y, quad) {
+            switch(quad) {
+                case 1:
+                    context.fillText(text, x * boxWidth + 2 + boxWidth/2, canvas.height - (y * boxHeight + 2 + boxHeight/2));
+                    break;
+                case 2:
+                    context.fillText(text, canvas.width - (x * boxWidth + 2 + boxWidth/2), canvas.height - (y * boxHeight + 2 + boxHeight/2));
+                    break;
+                case 3:
+                    context.fillText(text, canvas.width - (x * boxWidth + 2 + boxWidth/2), y * boxHeight + 2 + boxHeight/2);
+                    break;
+                case 4:
+                    context.fillText(text, x * boxWidth + 2 + boxWidth/2, y * boxHeight + 2 + boxHeight/2);
+                    break;
+            }
+        }
+    </script>
+</html>
