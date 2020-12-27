@@ -24,56 +24,73 @@
     <script>
         var canvas = document.getElementById("map");
         var context = canvas.getContext("2d");
-        var gridSize = 7;
+        var gridSize = 20;
         var boxWidth = canvas.width/gridSize;
         var boxHeight = canvas.height/gridSize;
+        var viewRadius = 6, rows = gridSize, column = gridSize;
         var grid = [];
         for (let i = 0; i < gridSize; i++) {
             for (let j = 0; j < gridSize; j++) {
-                grid.push({x: i, y: j, isWall: false, xMult: -1, yMult: 1});
+                grid.push({x: i, y: j, isWall: false, xMult: 1, yMult: 1});
             }
         }
+        var bot = {loc: 188};
+
+        
+        /* grid[29].isWall = true;
+        grid[30].isWall = true; */
+        /* grid[31].isWall = true;
+        grid[32].isWall = true;
+        grid[33].isWall = true;
+        grid[34].isWall = true; */
+        grid[208].isWall = true;
+        grid[124].isWall = true;
 
         console.log(grid);
         context.textAlign = "center";
-        context.font = "20px Arial";
+        context.font = "5px Arial";
         let cell;
         for (let i = 0; i < grid.length; i++) {
             cell = grid[i];
             context.fillStyle = "grey";
-            fillRect(cell.x, cell.y, 2);
+            if (i == bot.loc) context.fillStyle = "green";
+            fillRect(cell.x, cell.y, 4);
             context.fillStyle = "black";
-            fillText("(" + cell.x * cell.xMult + ", " + cell.y * cell.yMult + ")", cell.x, cell.y, 2);
+            fillText("(" + cell.x * cell.xMult + ", " + cell.y * cell.yMult + ")", cell.x, cell.y, 4);
         }
 
         // {x: 0, y: 0}, {x: 6, y: 6}
-        bresenhams(grid[0], grid[37], 2);
-        /* bresenhams(grid[0], grid[6], 2);
-        bresenhams(grid[0], grid[13], 2);
-        bresenhams(grid[0], grid[20], 2);
-        bresenhams(grid[0], grid[27], 2);
-        bresenhams(grid[0], grid[34], 2);
-        bresenhams(grid[0], grid[41], 2);
-        bresenhams(grid[0], grid[48], 2);
-        bresenhams(grid[0], grid[47], 2);
-        bresenhams(grid[0], grid[46], 2);
-        bresenhams(grid[0], grid[45], 2);
-        bresenhams(grid[0], grid[44], 2);
-        bresenhams(grid[0], grid[43], 2);
-        bresenhams(grid[0], grid[42], 2); */
+        // bresenhams(grid[0], grid[37], 2);
+        /* bresenhams(grid[0], grid[6], 4);
+        bresenhams(grid[0], grid[13], 4);
+        bresenhams(grid[0], grid[20], 4);
+        bresenhams(grid[0], grid[27], 4);
+        bresenhams(grid[0], grid[34], 4);
+        bresenhams(grid[0], grid[41], 4);
+        bresenhams(grid[0], grid[48], 4);
+        bresenhams(grid[0], grid[47], 4);
+        bresenhams(grid[0], grid[46], 4);
+        bresenhams(grid[0], grid[45], 4);
+        bresenhams(grid[0], grid[44], 4);
+        bresenhams(grid[0], grid[43], 4);
+        bresenhams(grid[0], grid[42], 4); */
 
-        function bresenhams(cell1, cell2, quad) {
+        console.log(findLineOfSight(bot));
+
+        function bresenhams(cell1, cell2, quad, thisGrid) {
             let x1 = cell1.x, y1 = cell1.y, x2 = cell2.x, y2 = cell2.y;
 
             let dx = x2 - x1, dy = y2 - y1;
             let m = dy/dx;
             let p;
 
-            console.log("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")");
-            context.fillStyle = "yellow";
+            let arr = [];
+            arr.push({x: x1, y: y1});
+            // console.log("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")");
+            /* context.fillStyle = "yellow";
             fillRect(x1, y1, quad);
             context.fillStyle = "black";
-            fillText("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")", x1, y1, quad);
+            fillText("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")", x1, y1, quad); */
 
             if (m >= 0 && m <= 1) {
                 p = (2*dy) - dx;
@@ -81,20 +98,24 @@
                     if (p < 0) {
                         x1++;
                         p += 2*dy;
-                        console.log("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")");
-                        context.fillStyle = "yellow";
+                        arr.push({x: x1, y: y1})
+                        if (grid[getCell(x1, y1, thisGrid).loc].isWall) break;
+                        // console.log("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")");
+                        /* context.fillStyle = "yellow";
                         fillRect(x1, y1, quad);
                         context.fillStyle = "black";
-                        fillText("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")", x1, y1, quad);
+                        fillText("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")", x1, y1, quad); */
                     } else {
                         x1++;
                         y1++;
                         p += 2*(dy - dx);
-                        console.log("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")");
-                        context.fillStyle = "yellow";
+                        arr.push({x: x1, y: y1});
+                        if (grid[getCell(x1, y1, thisGrid).loc].isWall) break;
+                        // console.log("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")");
+                        /* context.fillStyle = "yellow";
                         fillRect(x1, y1, quad);
                         context.fillStyle = "black";
-                        fillText("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")", x1, y1, quad);
+                        fillText("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")", x1, y1, quad); */
                     }
                 }
             } else if (m > 1) {
@@ -103,22 +124,136 @@
                     if (p < 0) {
                         y1++;
                         p += 2*dx;
-                        console.log("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")");
-                        context.fillStyle = "yellow";
+                        arr.push({x: x1, y: y1});
+                        if (grid[getCell(x1, y1, thisGrid).loc].isWall) break;
+                        // console.log("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")");
+                        /* context.fillStyle = "yellow";
                         fillRect(x1, y1, quad);
                         context.fillStyle = "black";
-                        fillText("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")", x1, y1, quad);
+                        fillText("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")", x1, y1, quad); */
                     } else {
                         x1++;
                         y1++;
                         p += 2*(dx - dy);
-                        console.log("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")");
-                        context.fillStyle = "yellow";
+                        arr.push({x: x1, y: y1});
+                        if (grid[getCell(x1, y1, thisGrid).loc].isWall) break;
+                        // console.log("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")");
+                        /* context.fillStyle = "yellow";
                         fillRect(x1, y1, quad);
                         context.fillStyle = "black";
-                        fillText("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")", x1, y1, quad);
+                        fillText("(" + x1 * cell1.xMult + ", " + y1 * cell1.yMult + ")", x1, y1, quad); */
                     }
                 }
+            }
+            console.log(cell1, cell2, arr, thisGrid);
+            drawArray(arr, thisGrid, quad);
+            return arr;
+        }
+
+        function findLineOfSight(bot) {
+            let thisSurroundings = [[], [], [], []];
+            let centerX = grid[bot.loc].x;
+            let centerY = grid[bot.loc].y;
+            let i = 0, j = 0;
+
+            // quadrant 1
+            for (let y = centerY; y >= centerY - viewRadius; y--) {
+                for (let x = centerX; x <= centerX + viewRadius; x++) {
+                    thisSurroundings[0].push({x: i, y: j, loc: y + x*rows});
+                    i++;
+                }
+                i = 0;
+                j++;
+            }
+
+            i = 0, j = 0;
+
+            // quadrant 2
+            for (let y = centerY; y >= centerY - viewRadius; y--) {
+                for (let x = centerX; x >= centerX - viewRadius; x--) {
+                    thisSurroundings[1].push({x: i, y: j, loc: y + x*rows});
+                    i++;
+                }
+                i = 0;
+                j++;
+            }
+
+            i = 0, j = 0;
+
+            // quadrant 3
+            for (let y = centerY; y <= centerY + viewRadius; y++) {
+                for (let x = centerX; x >= centerX - viewRadius; x--) {
+                    thisSurroundings[2].push({x: i, y: j, loc: y + x*rows});
+                    i++;
+                }
+                i = 0;
+                j++;
+            }
+
+            i = 0, j = 0;
+
+            //quadrant 4
+            for (let y = centerY; y <= centerY + viewRadius; y++) {
+                for (let x = centerX; x <= centerX + viewRadius; x++) {
+                    thisSurroundings[3].push({x: i, y: j, loc: y + x*rows});
+                    i++;
+                }
+                i = 0;
+                j++;
+            }
+
+            castRays(thisSurroundings);
+            return thisSurroundings;
+        }
+
+        function castRays(arr) {
+            // quadrant 1
+            for (let i = viewRadius; i < arr[0].length; i += viewRadius + 1) {
+                bresenhams(arr[0][0], arr[0][i], 1, arr[0]);
+            }
+            for (let i = arr[0].length - viewRadius - 1; i < arr[0].length - 1; i++) {
+                bresenhams(arr[0][0], arr[0][i], 1, arr[0])
+            }
+
+            // quadrant 2
+            for (let i = viewRadius; i < arr[1].length; i += viewRadius + 1) {
+                bresenhams(arr[1][0], arr[1][i], 2, arr[1]);
+            }
+            for (let i = arr[1].length - viewRadius - 1; i < arr[1].length - 1; i++) {
+                bresenhams(arr[1][0], arr[1][i], 2, arr[1])
+            }
+
+            // quadrant 3
+            for (let i = viewRadius; i < arr[2].length; i += viewRadius + 1) {
+                bresenhams(arr[2][0], arr[2][i], 3, arr[2]);
+            }
+            for (let i = arr[2].length - viewRadius - 1; i < arr[2].length - 1; i++) {
+                bresenhams(arr[2][0], arr[2][i], 3, arr[2])
+            }
+
+            // quadrant 4
+            for (let i = viewRadius; i < arr[3].length; i += viewRadius + 1) {
+                bresenhams(arr[3][0], arr[3][i], 4, arr[3]);
+            }
+            for (let i = arr[3].length - viewRadius - 1; i < arr[3].length - 1; i++) {
+                bresenhams(arr[3][0], arr[3][i], 4, arr[3])
+            }
+        }
+
+        function getCell(x, y, grid) {
+            for (let i = 0; i < grid.length; i++) {
+                if (grid[i].x == x && grid[i].y == y) return grid[i];
+            }
+            return null;
+        }
+
+        function drawArray(arr, thisGrid, quad) {
+            let cell;
+            console.log("this is", arr, thisGrid, grid[getCell(arr[0].x, arr[0].y, thisGrid).loc]);
+            context.fillStyle = "rgba(255, 255, 0, .5)";
+            for (let i = 0; i < arr.length; i++) {
+                cell = grid[getCell(arr[i].x, arr[i].y, thisGrid).loc];
+                fillRect(cell.x, cell.y, 4);
             }
         }
 
